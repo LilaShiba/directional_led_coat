@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Trig Visualizer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Trig Function Visualizer (Unit Circle)</h1>
+  <canvas id="canvas" width="500" height="500"></canvas>
+
+  <label for="angleSlider">Angle: <span id="angleValue">0</span>°</label>
+  <input type="range" id="angleSlider" min="0" max="360" value="0" />
+
+  <section id="info">
+    <h2>What You're Seeing</h2>
+    <p><strong>Cosine (blue):</strong> Horizontal component (x-axis) of the point on the unit circle.</p>
+    <p><strong>Sine (red):</strong> Vertical component (y-axis) of the point on the unit circle.</p>
+    <p><strong>Tangent (yellow):</strong> The slope, or sine divided by cosine, represented as a vertical line tangent to the circle.</p>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>
