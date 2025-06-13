@@ -23,6 +23,7 @@
       grid-template-columns: repeat(3, auto);
       gap: 1rem 2rem;
       align-items: center;
+      margin-bottom: 1.5rem;
     }
     .controls div {
       display: flex;
@@ -34,6 +35,30 @@
     }
     span {
       margin-left: 0.5rem;
+    }
+    .explanation {
+      background: #333;
+      padding: 1rem;
+      border-radius: 8px;
+      max-width: 600px;
+      line-height: 1.4;
+    }
+    .explanation h3 {
+      margin-top: 0;
+    }
+    .explanation ul {
+      list-style: none;
+      padding: 0;
+    }
+    .explanation li {
+      margin: 0.5rem 0;
+    }
+    .color-box {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      margin-right: 0.5em;
+      vertical-align: middle;
     }
   </style>
 </head>
@@ -72,6 +97,22 @@
         <span id="scalarVal">1.0</span>
       </label>
     </div>
+  </div>
+
+  <div class="explanation">
+    <h3>What You’re Seeing</h3>
+    <ul>
+      <li><span class="color-box" style="background:#09f"></span>
+          <strong>A (blue)</strong> — the base vector A, defined by its magnitude and angle.</li>
+      <li><span class="color-box" style="background:#f33"></span>
+          <strong>B (red)</strong> — the base vector B, defined by its magnitude and angle.</li>
+      <li><span class="color-box" style="background:#0f0"></span>
+          <strong>A + B (green)</strong> — the vector sum, drawn tip‑to‑tail from A to B.</li>
+      <li><span class="color-box" style="background:#ff0"></span>
+          <strong>A − B (yellow)</strong> — the difference, walking back from B to A.</li>
+      <li><span class="color-box" style="background:#f0f"></span>
+          <strong>k·A (magenta)</strong> — scalar multiple of A by k (if k is negative, the arrow flips).</li>
+    </ul>
   </div>
 
   <script>
@@ -130,10 +171,10 @@
       const A = { mag: +magA.value, ang: +angA.value };
       const B = { mag: +magB.value, ang: +angB.value };
       const k = +scalar.value;
-      magAval.textContent  = A.mag;
-      angAval.textContent  = A.ang + '°';
-      magBval.textContent  = B.mag;
-      angBval.textContent  = B.ang + '°';
+      magAval.textContent   = A.mag;
+      angAval.textContent   = A.ang + '°';
+      magBval.textContent   = B.mag;
+      angBval.textContent   = B.ang + '°';
       scalarVal.textContent = k.toFixed(1);
 
       // Convert to Cartesian
