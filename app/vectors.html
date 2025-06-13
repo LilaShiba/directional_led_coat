@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Interactive Vector Operations</title>
+  <style>
+    body {
+      background: #222;
+      color: #eee;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+    }
+    canvas {
+      background: #111;
+      border: 1px solid #555;
+      margin-bottom: 1rem;
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(3, auto);
+      gap: 1rem 2rem;
+      align-items: center;
+    }
+    .controls div {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    label {
+      margin-top: 0.5rem;
+    }
+    span {
+      margin-left: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Vector Addition, Subtraction & Scalar Multiplication</h2>
+  <canvas id="canvas" width="500" height="500"></canvas>
+
+  <div class="controls">
+    <div>
+      <strong>Vector A</strong>
+      <label>Magnitude:
+        <input id="magA" type="range" min="0" max="200" value="100">
+        <span id="magAval">100</span>
+      </label>
+      <label>Angle θ:
+        <input id="angA" type="range" min="0" max="360" value="45">
+        <span id="angAval">45°</span>
+      </label>
+    </div>
+    <div>
+      <strong>Vector B</strong>
+      <label>Magnitude:
+        <input id="magB" type="range" min="0" max="200" value="80">
+        <span id="magBval">80</span>
+      </label>
+      <label>Angle θ:
+        <input id="angB" type="range" min="0" max="360" value="135">
+        <span id="angBval">135°</span>
+      </label>
+    </div>
+    <div>
+      <strong>Scalar k</strong>
+      <label>
+        <input id="scalar" type="range" min="-3" max="3" step="0.1" value="1">
+        <span id="scalarVal">1.0</span>
+      </label>
+    </div>
+  </div>
+
+  <script>
+    const c         = document.getElementById('canvas');
+    const ctx       = c.getContext('2d');
+    const CX        = c.width  / 2;
+    const CY        = c.height / 2;
+
+    // Controls
+    const magA     = document.getElementById('magA');
+    const angA     = document.getElementById('angA');
+    const magAval  = document.getElementById('magAval');
+    const angAval  = document.getElementById('angAval');
+    const magB     = document.getElementById('magB');
+    const angB     = document.getElementById('angB');
+    const magBval  = document.getElementById('magBval');
+    const angBval  = document.getElementById('angBval');
+    const scalar     = document.getElementById('scalar');
+    const scalarVal  = document.getElementById('scalarVal');
+
+    function toVec(mag, angDeg) {
+      const θ = angDeg * Math.PI / 180;
+      return { x: mag * Math.cos(θ), y: mag * Math.sin(θ) };
+    }
+
+    function drawArrow(v, col, label) {
+      ctx.strokeStyle = col;
+      ctx.lineWidth   = 2;
+      ctx.beginPath();
+      ctx.moveTo(CX, CY);
+      ctx.lineTo(CX + v.x, CY - v.y);
+      ctx.stroke();
+      // Arrowhead
+      const headLen = 10;
+      const angle = Math.atan2(v.y, v.x);
+      ctx.beginPath();
+      ctx.moveTo(CX + v.x, CY - v.y);
+      ctx.lineTo(
+        CX + v.x - headLen * Math.cos(angle - Math.PI/6),
+        CY - v.y + headLen * Math.sin(angle - Math.PI/6)
+      );
+      ctx.lineTo(
+        CX + v.x - headLen * Math.cos(angle + Math.PI/6),
+        CY - v.y + headLen * Math.sin(angle + Math.PI/6)
+      );
+      ctx.closePath();
+      ctx.fillStyle = col;
+      ctx.fill();
+      // Label
+      ctx.fillStyle = col;
+      ctx.fillText(label, CX + v.x + 5, CY - v.y - 5);
+    }
+
+    function update() {
+      // Read & display control values
+      const A = { mag: +magA.value, ang: +angA.value };
+      const B = { mag: +magB.value, ang: +angB.value };
+      const k = +scalar.value;
+      magAval.textContent  = A.mag;
+      angAval.textContent  = A.ang + '°';
+      magBval.textContent  = B.mag;
+      angBval.textContent  = B.ang + '°';
+      scalarVal.textContent = k.toFixed(1);
+
+      // Convert to Cartesian
+      const vA = toVec(A.mag, A.ang);
+      const vB = toVec(B.mag, B.ang);
+
+      // Compute results
+      const vAdd = { x: vA.x + vB.x, y: vA.y + vB.y };
+      const vSub = { x: vA.x - vB.x, y: vA.y - vB.y };
+      const vMul = { x: k * vA.x,   y: k * vA.y   };
+
+      // Clear & draw axes
+      ctx.clearRect(0, 0, c.width, c.height);
+      ctx.strokeStyle = '#333';
+      ctx.beginPath();
+      ctx.moveTo(CX, 0);      ctx.lineTo(CX, c.height);
+      ctx.moveTo(0, CY);      ctx.lineTo(c.width, CY);
+      ctx.stroke();
+      ctx.fillStyle = '#fff';
+      ctx.fillText('Origin', CX + 5, CY + 15);
+
+      // Draw vectors
+      drawArrow(vA,    '#09f', 'A');
+      drawArrow(vB,    '#f33', 'B');
+      drawArrow(vAdd,  '#0f0', 'A + B');
+      drawArrow(vSub,  '#ff0', 'A − B');
+      drawArrow(vMul,  '#f0f', 'k·A');
+    }
+
+    // Wire up events
+    [magA, angA, magB, angB, scalar].forEach(el =>
+      el.addEventListener('input', update)
+    );
+
+    // Initial draw
+    update();
+  </script>
+</body>
+</html>
