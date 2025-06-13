@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Eigenvalue Visualizer</title>
+  <style>
+    body {
+      background: #111;
+      color: #eee;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 1rem;
+    }
+    canvas {
+      background: #222;
+      border: 1px solid #555;
+      margin: 1rem auto;
+    }
+    .matrix-controls {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .matrix-controls input {
+      width: 4rem;
+      text-align: center;
+    }
+    .eigenvalues {
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h2>2×2 Matrix Eigenvalue Visualizer</h2>
+
+  <canvas id="canvas" width="500" height="500"></canvas>
+
+  <div class="matrix-controls">
+    <div>
+      <label>A11 <input type="number" id="a11" value="2"></label><br>
+      <label>A12 <input type="number" id="a12" value="1"></label>
+    </div>
+    <div>
+      <label>A21 <input type="number" id="a21" value="1"></label><br>
+      <label>A22 <input type="number" id="a22" value="3"></label>
+    </div>
+  </div>
+
+  <div class="eigenvalues" id="eigenDisplay"></div>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const CX = canvas.width / 2;
+    const CY = canvas.height / 2;
+    const SCALE = 100;
+
+    const inputs = ["a11", "a12", "a21", "a22"].map(id => document.getElementById(id));
+
+    function draw() {
+      const a11 = parseFloat(inputs[0].value);
+      const a12 = parseFloat(inputs[1].value);
+      const a21 = parseFloat(inputs[2].value);
+      const a22 = parseFloat(inputs[3].value);
+
+      const A = [[a11, a12], [a21, a22]];
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Axes
+      ctx.strokeStyle = "#666";
+      ctx.beginPath();
+      ctx.moveTo(0, CY); ctx.lineTo(canvas.width, CY);
+      ctx.moveTo(CX, 0); ctx.lineTo(CX, canvas.height);
+      ctx.stroke();
+
+      // Unit vectors around the circle
+      ctx.strokeStyle = "#0af";
+      for (let i = 0; i < 360; i += 10) {
+        const angle = i * Math.PI / 180;
+        const v = [Math.cos(angle), Math.sin(angle)];
+        const Av = [a11 * v[0] + a12 * v[1], a21 * v[0] + a22 * v[1]];
+
+        ctx.beginPath();
+        ctx.moveTo(CX + v[0] * SCALE, CY - v[1] * SCALE);
+        ctx.lineTo(CX + Av[0] * SCALE, CY - Av[1] * SCALE);
+        ctx.stroke();
+      }
+
+      // Compute eigenvalues and eigenvectors
+      const trace = a11 + a22;
+      const det = a11 * a22 - a12 * a21;
+      const discrim = trace * trace - 4 * det;
+      const display = document.getElementById("eigenDisplay");
+      if (discrim < 0) {
+        display.innerHTML = `<b>Complex eigenvalues:</b> No real eigenvectors`;
+        return;
+      }
+      const sqrtDisc = Math.sqrt(discrim);
+      const lambda1 = (trace + sqrtDisc) / 2;
+      const lambda2 = (trace - sqrtDisc) / 2;
+
+      function eigenvector(lambda) {
+        // (A - lambda*I)v = 0 => Solve for null space
+        const x = 1;
+        const y = (lambda - a11) !== 0 ? -a12 / (lambda - a11) : 1;
+        const norm = Math.sqrt(x*x + y*y);
+        return [x/norm, y/norm];
+      }
+
+      const ev1 = eigenvector(lambda1);
+      const ev2 = eigenvector(lambda2);
+
+      // Draw eigenvectors
+      ctx.strokeStyle = "#0f0";
+      ctx.beginPath();
+      ctx.moveTo(CX - ev1[0]*SCALE, CY + ev1[1]*SCALE);
+      ctx.lineTo(CX + ev1[0]*SCALE, CY - ev1[1]*SCALE);
+      ctx.stroke();
+
+      ctx.strokeStyle = "#ff0";
+      ctx.beginPath();
+      ctx.moveTo(CX - ev2[0]*SCALE, CY + ev2[1]*SCALE);
+      ctx.lineTo(CX + ev2[0]*SCALE, CY - ev2[1]*SCALE);
+      ctx.stroke();
+
+      display.innerHTML = `<b>Real Eigenvalues:</b><br>
+        λ₁ = ${lambda1.toFixed(3)}, λ₂ = ${lambda2.toFixed(3)}<br>
+        Green: eigenvector 1<br>
+        Yellow: eigenvector 2`;
+    }
+
+    inputs.forEach(input => input.addEventListener("input", draw));
+    draw();
+  </script>
+</body>
+</html>
