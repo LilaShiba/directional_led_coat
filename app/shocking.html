@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Voltage, Current & Power Explorer</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+      background: #f5f5f5;
+    }
+    canvas {
+      border: 1px solid #ccc;
+      background: white;
+    }
+    .controls {
+      margin-top: 1rem;
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+    .control {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    label { margin-bottom: .5rem; }
+    #powerValue {
+      margin-top: .5rem;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>Voltage (V), Current (I) & Power (P = V×I)</h2>
+  <canvas id="canvas" width="600" height="400"></canvas>
+
+  <div class="controls">
+    <div class="control">
+      <label for="voltageSlider">Voltage (V)</label>
+      <input type="range" id="voltageSlider" min="0" max="240" step="1" value="120">
+      <span id="voltageValue">120 V</span>
+    </div>
+    <div class="control">
+      <label for="currentSlider">Current (A)</label>
+      <input type="range" id="currentSlider" min="0" max="10" step="0.1" value="5">
+      <span id="currentValue">5.0 A</span>
+    </div>
+    <div class="control">
+      <label>Power (P)</label>
+      <span id="powerValue">600 W</span>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const vSlider = document.getElementById('voltageSlider');
+    const iSlider = document.getElementById('currentSlider');
+    const vValue = document.getElementById('voltageValue');
+    const iValue = document.getElementById('currentValue');
+    const pValue = document.getElementById('powerValue');
+
+    const margin = 50;
+    const plotWidth = canvas.width - margin * 2;
+    const plotHeight = canvas.height - margin * 2;
+
+    function drawPlot(V, I) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw axes
+      ctx.strokeStyle = '#444';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      // X-axis
+      ctx.moveTo(margin, canvas.height - margin);
+      ctx.lineTo(canvas.width - margin, canvas.height - margin);
+      // Y-axis
+      ctx.moveTo(margin, canvas.height - margin);
+      ctx.lineTo(margin, margin);
+      ctx.stroke();
+
+      // Axis labels
+      ctx.fillStyle = '#000';
+      ctx.font = '14px sans-serif';
+      ctx.fillText('0', margin-10, canvas.height - margin + 15);
+      ctx.fillText('Voltage →', canvas.width - margin - 60, canvas.height - margin + 30);
+      ctx.save();
+      ctx.translate(margin - 30, margin + 20);
+      ctx.rotate(-Math.PI/2);
+      ctx.fillText('Current ↑', 0, 0);
+      ctx.restore();
+
+      // Scale V and I to plot:
+      // V range [0..240] → [0..plotWidth]
+      // I range [0..10]  → [0..plotHeight]
+      const xLen = (V / 240) * plotWidth;
+      const yLen = (I / 10) * plotHeight;
+
+      // Draw rectangle representing power area
+      ctx.fillStyle = 'rgba(0, 150, 255, 0.3)';
+      ctx.fillRect(
+        margin,
+        canvas.height - margin - yLen,
+        xLen,
+        yLen
+      );
+      ctx.strokeStyle = '#09f';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(
+        margin,
+        canvas.height - margin - yLen,
+        xLen,
+        yLen
+      );
+
+      // Annotate V length
+      ctx.strokeStyle = '#09f';
+      ctx.beginPath();
+      ctx.moveTo(margin, canvas.height - margin + 5);
+      ctx.lineTo(margin + xLen, canvas.height - margin + 5);
+      ctx.stroke();
+      ctx.fillText(`${V.toFixed(0)} V`, margin + xLen/2 - 15, canvas.height - margin + 20);
+
+      // Annotate I height
+      ctx.strokeStyle = '#f33';
+      ctx.beginPath();
+      ctx.moveTo(margin - 5, canvas.height - margin);
+      ctx.lineTo(margin - 5, canvas.height - margin - yLen);
+      ctx.stroke();
+      ctx.fillText(`${I.toFixed(1)} A`, margin - 45, canvas.height - margin - yLen/2 + 5);
+    }
+
+    function update() {
+      const V = parseFloat(vSlider.value);
+      const I = parseFloat(iSlider.value);
+      vValue.textContent = `${V.toFixed(0)} V`;
+      iValue.textContent = `${I.toFixed(1)} A`;
+      const P = V * I;
+      pValue.textContent = `${P.toFixed(1)} W`;
+      drawPlot(V, I);
+    }
+
+    vSlider.addEventListener('input', update);
+    iSlider.addEventListener('input', update);
+
+    // Initial draw
+    update();
+  </script>
+</body>
+</html>
