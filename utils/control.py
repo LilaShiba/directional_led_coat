@@ -1,10 +1,11 @@
 import argparse
 from typing import Optional, Tuple
-
+from leds import Leds
 # Raspberry Pi-specific imports
 import board
 import busio
 import adafruit_gps
+
 
 # Constants
 MAX_RETRIES = 5
@@ -19,6 +20,7 @@ class Sensors:
         self.i2c = self.init_i2c(frequency)
         self.sensors = self.init_sensors()
         self.gps = self.sensors['gps']
+        self.led = self.sensors['leds']
 
     def init_i2c(self, frequency: int) -> busio.I2C:
         """Initializes and returns the I2C connection."""
@@ -28,7 +30,8 @@ class Sensors:
         """Initializes all sensors and returns them as a dictionary."""
         return {
     
-            "gps": adafruit_gps.GPS_GtopI2C(self.i2c, debug=False)
+            "gps": adafruit_gps.GPS_GtopI2C(self.i2c, debug=False),
+            "leds": Leds(self.i2c, debug=False),
         }
 
     def read_gps(self) -> Optional[Tuple[float, float, float]]:
