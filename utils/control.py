@@ -2,14 +2,16 @@ import argparse
 from typing import Optional, Tuple
 from leds import Leds
 # Raspberry Pi-specific imports
-import board
-import busio
-import adafruit_gps
+import board # type: ignore
+import busio # type: ignore
+import adafruit_gps # type: ignore
 
 
 # Constants
 MAX_RETRIES = 5
 RETRY_DELAY = 0.5
+I2C_FREQUENCY = 100_000
+
 
 
 # 🛠️ Initialization Functions
@@ -31,35 +33,11 @@ class Sensors:
         return {
     
             "gps": adafruit_gps.GPS_GtopI2C(self.i2c, debug=False),
-            "leds": Leds(self.i2c, debug=False),
+            "leds": Leds(self.i2c),
         }
 
     def read_gps(self) -> Optional[Tuple[float, float, float]]:
         self.gps.update()
-        return self.gps.latitude, self.gps.longitude, self.gps.speed_knots
+        return (self.gps.latitude, self.gps.longitude, self.gps.speed_knots)
     
-    @staticmethod
-    def main(self, conditions):
-        try:
-            sensors = Sensors()
-            sensors.configure_sensors()
 
-        except KeyboardInterrupt:
-            print("\n🛑 Data recording interrupted by user.")
-
-        except Exception as e:
-            print(f"🔥 Fatal error: {e}")
-
-    @staticmethod
-    def parse_args():
-        """Parse command-line arguments."""
-        parser = argparse.ArgumentParser(description="Record sensor data to CSV.")
-        parser.add_argument('--duration', type=int, default=10,
-                            help='Recording duration in seconds')
-        parser.add_argument('--frequency', type=int, default=1,
-                            help='Sampling frequency in Hz')
-        return parser.parse_args()
-
-
-if __name__ == "__main__":
-    Sensors.main()

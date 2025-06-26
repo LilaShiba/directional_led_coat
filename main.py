@@ -4,25 +4,28 @@ from dotenv import load_dotenv
 import os
 import numpy as np
 
+
+I2C_FREQUENCY = 100_000
+
 class CyberCoat:
     def __init__(self):
         self.sensors = control.Sensors()
         self.location = (None, None)
-        self.lat = int(os.getenv('LAT'))
-        self.lon = int(os.getenv('LON'))
+        self.lat = int(os.getenv('LAT')) # type: ignore
+        self.lon = int(os.getenv('LON')) # type: ignore
         self.home = (self.lat, self.lon)
         self.dx, self.dy = self.lat, self.lon
         self.bearing_deg = 0
 
     def startup_protocol(self):
-        self.sensors.init_i2c()
+        self.sensors.init_i2c(I2C_FREQUENCY)
         self.sensors.init_sensors()
 
     def get_location(self):
         start_time = time.time()
         x, y, z, = 0, 0, 0
         for _ in range(5):
-            lat, lon, speed = self.sensors.read_gps()
+            lat, lon, speed = self.sensors.read_gps() # type: ignore
             x += lat
             y += lon
             z += speed
@@ -37,7 +40,7 @@ class CyberCoat:
         return abs(self.lat - self.dx) + abs(self.lon - self.dy)
 
     def get_bearng(self):
-        angle_rad = np.atan2(self.dx, self.dy)  
+        angle_rad = np.arctan2(self.dx, self.dy)  
         self.bearing_deg = (np.degrees(angle_rad) + 360) % 360
         return self.bearing_deg
 
